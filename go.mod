@@ -7,5 +7,5 @@ require (
 	github.com/libs4go/scf4go v0.0.8
 	github.com/libs4go/slf4go v0.0.4
 	github.com/multiformats/go-multiaddr v0.3.1
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.6.1
 )
