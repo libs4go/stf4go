@@ -56,42 +56,40 @@ type TunnelTransport interface {
 }
 
 func lookupTransports(addr multiaddr.Multiaddr) ([]multiaddr.Multiaddr, NativeTransport, []TunnelTransport, error) {
+
 	addrs := multiaddr.Split(addr)
 
-	protocol := addrs[0].Protocols()[0]
+	count := len(addrs)
 
-	transport, ok := globalRegister.get(protocol.Name)
+	var tunnels []TunnelTransport
 
-	if !ok {
-		return nil, nil, nil, errors.Wrap(ErrTransport, "unsupport transport %s", protocol.Name)
-	}
+	for i := 1; i < count; i++ {
+		current := addrs[count-i]
 
-	nativeTransport, ok := transport.(NativeTransport)
-
-	if !ok {
-		return nil, nil, nil, errors.Wrap(ErrTransport, "first transport %s is not native transport", addrs[0].String())
-	}
-
-	var transports []TunnelTransport
-
-	for _, addr := range addrs[1:] {
-
-		protocol := addr.Protocols()[0]
-
-		transport, ok := globalRegister.get(protocol.Name)
+		transport, ok := globalRegister.get(current.Protocols()[0].Name)
 
 		if !ok {
-			return nil, nil, nil, errors.Wrap(ErrTransport, "unsupport transport %s", protocol.Name)
+			return nil, nil, nil, errors.Wrap(ErrTransport, "protocol %s not found", current.Protocols()[0].Name)
+		}
+
+		nativeTransport, ok := transport.(NativeTransport)
+
+		if ok {
+			addrs = append([]multiaddr.Multiaddr{
+				multiaddr.Join(addrs[0 : count-i+1]...),
+			}, addrs[count-i+1:]...)
+
+			return addrs, nativeTransport, tunnels, nil
 		}
 
 		tunnelTransport, ok := transport.(TunnelTransport)
 
 		if !ok {
-			return nil, nil, nil, errors.Wrap(ErrTransport, "first transport %s is not native transport", addrs[0].String())
+			return nil, nil, nil, errors.Wrap(ErrTransport, "protocol %s must be tunnel transport", current.Protocols()[0].Name)
 		}
 
-		transports = append(transports, tunnelTransport)
+		tunnels = append(tunnels, tunnelTransport)
 	}
 
-	return addrs, nativeTransport, transports, nil
+	return nil, nil, nil, errors.Wrap(ErrTransport, "expect native transport")
 }
