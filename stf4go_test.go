@@ -130,13 +130,7 @@ func TestLookupTransportException(t *testing.T) {
 
 	require.Error(t, err, "detect native transport test failed")
 
-	addr, err = multiaddr.NewMultiaddr("/ip4/127.0.0.1/udp/1812/kcp/kcp")
+	_, err = multiaddr.NewMultiaddr("/ip4/127.0.0.1/udp/1812/fs")
 
-	require.NoError(t, err)
-
-	require.NotNil(t, addr)
-
-	_, _, _, err = lookupTransports(addr)
-
-	require.Error(t, err, "detect native transport test failed")
+	require.Error(t, err, "")
 }

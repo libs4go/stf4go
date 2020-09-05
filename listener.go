@@ -13,13 +13,19 @@ type wrapListener struct {
 	listener Listener
 }
 
-// Wrap wrap stf4go Listener to net.Listener
-func Wrap(listener Listener) net.Listener {
+// WrapListener wrap stf4go Listener to net.Listener
+func WrapListener(listener Listener) net.Listener {
 	return nil
 }
 
 func (wrap *wrapListener) Accept() (net.Conn, error) {
-	return wrap.listener.Accept()
+	conn, err := wrap.listener.Accept()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return WrapConn(conn)
 }
 
 func (wrap *wrapListener) Close() error {

@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/libs4go/errors"
+	"github.com/multiformats/go-multiaddr"
 )
 
 type transportRegister struct {
@@ -24,6 +25,12 @@ func (register *transportRegister) add(transport Transport) error {
 		}
 
 		register.transports[protocol.Name] = transport
+
+		if multiaddr.ProtocolWithName(protocol.Name).Code == 0 {
+			if err := multiaddr.AddProtocol(protocol); err != nil {
+				return errors.Wrap(err, "add protocol %s error", protocol.Name)
+			}
+		}
 	}
 
 	return nil
