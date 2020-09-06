@@ -6,13 +6,14 @@ import (
 
 	_ "github.com/libs4go/bcf4go/key/encoding" //
 	_ "github.com/libs4go/bcf4go/key/provider" //
+	"github.com/libs4go/errors"
 	"github.com/libs4go/scf4go"
 	"github.com/libs4go/slf4go"
 	"github.com/libs4go/stf4go"
 	"github.com/multiformats/go-multiaddr"
 )
 
-const protocolTLSID = 482
+const protocolTLSID = 483
 
 var protoTLS = multiaddr.Protocol{
 	Name:  "tls",
@@ -77,6 +78,10 @@ func (transport *tlsTransport) Client(conn stf4go.Conn, raddr multiaddr.Multiadd
 
 	session := tls.Client(wrapConn, tlsConfig)
 
+	if err := session.Handshake(); err != nil {
+		return nil, errors.Wrap(err, "tls handshake error")
+	}
+
 	return newTLSConn(session, conn, remoteKey)
 }
 
@@ -101,6 +106,10 @@ func (transport *tlsTransport) Server(conn stf4go.Conn, laddr multiaddr.Multiadd
 	}
 
 	session := tls.Server(wrapConn, tlsConfig)
+
+	if err := session.Handshake(); err != nil {
+		return nil, errors.Wrap(err, "tls handshake error")
+	}
 
 	return newTLSConn(session, conn, remoteKey)
 }

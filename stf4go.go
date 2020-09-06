@@ -19,6 +19,7 @@ var (
 	ErrTransport = errors.New("transport load error", errors.WithVendor(errVendor), errors.WithCode(-1))
 	ErrMultiAddr = errors.New("multiaddr error", errors.WithVendor(errVendor), errors.WithCode(-2))
 	ErrPassword  = errors.New("password error", errors.WithVendor(errVendor), errors.WithCode(-3))
+	ErrSign      = errors.New("signature invalid", errors.WithVendor(errVendor), errors.WithCode(-4))
 )
 
 var log = slf4go.Get("stf4go")

@@ -8,10 +8,12 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
-	"errors"
 	"fmt"
 	"math/big"
 	"time"
+
+	"github.com/libs4go/errors"
+	"github.com/libs4go/stf4go"
 
 	"github.com/libs4go/bcf4go/key"
 	"golang.org/x/sys/cpu"
@@ -69,6 +71,7 @@ func keyToCertificate(k key.Key) (*tls.Certificate, error) {
 		PubKey:    keyBytes,
 		Signature: signature,
 	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -81,15 +84,16 @@ func keyToCertificate(k key.Key) (*tls.Certificate, error) {
 		SerialNumber: sn,
 		NotBefore:    time.Time{},
 		NotAfter:     time.Now().Add(certValidityPeriod),
-		// after calling CreateCertificate, these will end up in Certificate.Extensions
 		ExtraExtensions: []pkix.Extension{
 			{Id: extensionID, Value: value},
 		},
 	}
 	certDER, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, certKey.Public(), certKey)
+
 	if err != nil {
 		return nil, err
 	}
+
 	return &tls.Certificate{
 		Certificate: [][]byte{certDER},
 		PrivateKey:  certKey,
@@ -172,10 +176,10 @@ func publicKeyFromCertChain(chain []*x509.Certificate) ([]byte, error) {
 		return nil, err
 	}
 
-	valid := key.Verify(sk.Provider, append([]byte(certificatePrefix), certKeyPub...), sk.PubKey, sk.Signature)
+	valid := key.Verify(sk.Provider, sk.PubKey, sk.Signature, append([]byte(certificatePrefix), certKeyPub...))
 
 	if !valid {
-		return nil, errors.New("signature invalid")
+		return nil, errors.Wrap(stf4go.ErrSign, "")
 	}
 
 	return sk.PubKey, nil

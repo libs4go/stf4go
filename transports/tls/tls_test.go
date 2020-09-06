@@ -11,6 +11,7 @@ import (
 	"github.com/libs4go/slf4go"
 	_ "github.com/libs4go/slf4go/backend/console" //
 	"github.com/libs4go/stf4go"
+	_ "github.com/libs4go/stf4go/transports/kcp" //
 	_ "github.com/libs4go/stf4go/transports/tcp" //
 	"github.com/multiformats/go-multiaddr"
 	"github.com/stretchr/testify/require"
@@ -66,7 +67,7 @@ func newKeyStore(t *testing.T) stf4go.Option {
 
 func TestListenConnect(t *testing.T) {
 
-	laddr, err := multiaddr.NewMultiaddr("/ip4/127.0.0.1/tcp/1813/tls")
+	laddr, err := multiaddr.NewMultiaddr("/ip4/127.0.0.1/udp/1813/kcp/tls")
 
 	require.NoError(t, err)
 
@@ -81,9 +82,21 @@ func TestListenConnect(t *testing.T) {
 		_, err := stf4go.Dial(context.Background(), laddr, KeyProvider("eth"), KeyPassword("test"), newKeyStore(t))
 
 		require.NoError(t, err)
+
+		// _, err = conn.Write([]byte("hello world"))
+
+		// require.NoError(t, err)
 	}()
 
-	_, err = listener.Accept()
+	conn, err := listener.Accept()
 
 	require.NoError(t, err)
+
+	// var buff [32]byte
+
+	// _, err = conn.Read(buff[:])
+
+	// require.NoError(t, err)
+
+	<-conn.(Conn).RemoteKey()
 }
