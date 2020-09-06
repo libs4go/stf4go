@@ -14,7 +14,7 @@ func getKey(config scf4go.Config) (key.Key, error) {
 
 	var data interface{}
 
-	if err := config.Get("key", "store").Scan(&data); err != nil {
+	if err := config.Get("tls", "key", "store").Scan(&data); err != nil {
 		return nil, err
 	}
 
@@ -24,13 +24,13 @@ func getKey(config scf4go.Config) (key.Key, error) {
 		return nil, errors.Wrap(err, "marshal key error")
 	}
 
-	provider := config.Get("key", "provider").String("")
+	provider := config.Get("tls", "key", "provider").String("")
 
 	if provider == "" {
 		return nil, errors.Wrap(stf4go.ErrPassword, "tls key need key provider")
 	}
 
-	password := config.Get("key", "password").String("")
+	password := config.Get("tls", "key", "password").String("")
 
 	if password == "" {
 		return nil, errors.Wrap(stf4go.ErrPassword, "tls key need password")
@@ -50,7 +50,7 @@ func getKey(config scf4go.Config) (key.Key, error) {
 // KeyProvider tls key provider
 func KeyProvider(name string) stf4go.Option {
 	return func(cw *stf4go.ConfigWriter) error {
-		cw.Set(name, "key", "provider")
+		cw.Set(name, "tls", "key", "provider")
 		return nil
 	}
 }
@@ -58,7 +58,7 @@ func KeyProvider(name string) stf4go.Option {
 // KeyPassword tls key protection password
 func KeyPassword(password string) stf4go.Option {
 	return func(cw *stf4go.ConfigWriter) error {
-		cw.Set(password, "key", "password")
+		cw.Set(password, "tls", "key", "password")
 		return nil
 	}
 }
@@ -73,7 +73,7 @@ func KeyWeb3(buff []byte) stf4go.Option {
 			return errors.Wrap(err, "unmarshal web3 keystore error")
 		}
 
-		cw.Set(data, "key", "store")
+		cw.Set(data, "tls", "key", "store")
 		return nil
 	}
 }
