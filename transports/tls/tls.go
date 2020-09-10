@@ -46,7 +46,7 @@ func newTLSTransport() *tlsTransport {
 	}
 }
 
-func (transport *tlsTransport) Name() string {
+func (transport *tlsTransport) String() string {
 	return "stf4go-transport-tls"
 }
 
@@ -82,7 +82,7 @@ func (transport *tlsTransport) Client(conn stf4go.Conn, raddr multiaddr.Multiadd
 		return nil, errors.Wrap(err, "tls handshake error")
 	}
 
-	return newTLSConn(session, conn, remoteKey)
+	return newTLSConn(session, conn, key.PubKey(), remoteKey)
 }
 
 func (transport *tlsTransport) Server(conn stf4go.Conn, laddr multiaddr.Multiaddr, config scf4go.Config) (stf4go.Conn, error) {
@@ -111,23 +111,27 @@ func (transport *tlsTransport) Server(conn stf4go.Conn, laddr multiaddr.Multiadd
 		return nil, errors.Wrap(err, "tls handshake error")
 	}
 
-	return newTLSConn(session, conn, remoteKey)
+	return newTLSConn(session, conn, key.PubKey(), remoteKey)
 }
 
 type tlsConn struct {
 	net.Conn
-	laddr     multiaddr.Multiaddr
-	raddr     multiaddr.Multiaddr
-	remoteKey chan []byte
+	laddr      multiaddr.Multiaddr
+	raddr      multiaddr.Multiaddr
+	remoteKey  chan []byte
+	underlying stf4go.Conn
+	localKey   []byte
 }
 
-func newTLSConn(conn net.Conn, underlying stf4go.Conn, remoteKey chan []byte) (*tlsConn, error) {
+func newTLSConn(conn net.Conn, underlying stf4go.Conn, localKey []byte, remoteKey chan []byte) (*tlsConn, error) {
 
 	return &tlsConn{
-		Conn:      conn,
-		laddr:     underlying.LocalAddr().Encapsulate(tlsMultiAddr),
-		raddr:     underlying.RemoteAddr().Encapsulate(tlsMultiAddr),
-		remoteKey: remoteKey,
+		Conn:       conn,
+		laddr:      underlying.LocalAddr().Encapsulate(tlsMultiAddr),
+		raddr:      underlying.RemoteAddr().Encapsulate(tlsMultiAddr),
+		remoteKey:  remoteKey,
+		underlying: underlying,
+		localKey:   localKey,
 	}, nil
 }
 
@@ -139,8 +143,8 @@ func (conn *tlsConn) RemoteAddr() multiaddr.Multiaddr {
 	return conn.raddr
 }
 
-func (conn *tlsConn) Underlying() *stf4go.Conn {
-	return nil
+func (conn *tlsConn) Underlying() stf4go.Conn {
+	return conn.underlying
 }
 
 func (conn *tlsConn) Close() error {
@@ -152,6 +156,10 @@ func (conn *tlsConn) RemoteKey() <-chan []byte {
 	return conn.remoteKey
 }
 
+func (conn *tlsConn) LocalKey() []byte {
+	return conn.localKey
+}
+
 func init() {
 	stf4go.RegisterTransport(newTLSTransport())
 }
@@ -160,4 +168,5 @@ func init() {
 type Conn interface {
 	stf4go.Conn
 	RemoteKey() <-chan []byte
+	LocalKey() []byte
 }

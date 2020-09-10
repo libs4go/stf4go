@@ -21,7 +21,7 @@ func newTransportRegister() *transportRegister {
 func (register *transportRegister) add(transport Transport) error {
 	for _, protocol := range transport.Protocols() {
 		if _, ok := register.transports[protocol.Name]; ok {
-			return errors.Wrap(ErrTransport, "transport %s protocol %s already register", transport.Name(), protocol.Name)
+			return errors.Wrap(ErrTransport, "transport %s protocol %s already register", transport, protocol.Name)
 		}
 
 		register.transports[protocol.Name] = transport

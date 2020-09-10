@@ -3,6 +3,7 @@ package stf4go
 import (
 	"context"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/libs4go/errors"
@@ -83,17 +84,28 @@ func Dial(ctx context.Context, raddr multiaddr.Multiaddr, options ...Option) (Co
 		return nil, err
 	}
 
+	log.D("tunnel addrs {@addrs}", addrs)
+
+	var tunns []string
+
+	for _, t := range tunnelTransports {
+		tunns = append(tunns, t.String())
+	}
+
+	log.D("tunnel tuns {@tuns}", strings.Join(tunns, ","))
+
 	conn, err := nativeTransport.Dial(ctx, addrs[0], configWriter.config)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "call native transport %s Dial error", nativeTransport.Name())
+		return nil, errors.Wrap(err, "call native transport %s Dial error", nativeTransport)
 	}
 
 	for i, tunnel := range tunnelTransports {
+		log.D("wrap tunnel client with addr {@addr}", addrs[i+1].String())
 		conn, err = tunnel.Client(conn, addrs[i+1], configWriter.config)
 
 		if err != nil {
-			return nil, errors.Wrap(err, "call tunnel transport %s Client error", tunnel.Name())
+			return nil, errors.Wrap(err, "call tunnel transport %s Client error", tunnel)
 		}
 	}
 

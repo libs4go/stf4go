@@ -82,7 +82,7 @@ type Conn interface {
 	// A zero value for t means Write will not time out.
 	SetWriteDeadline(t time.Time) error
 	// Underlying get underlying wrap conn
-	Underlying() *Conn
+	Underlying() Conn
 }
 
 // Listener .
@@ -95,7 +95,7 @@ type Listener interface {
 // Transport stf4go tunnel transport base protocol
 type Transport interface {
 	// Name transport name
-	Name() string
+	String() string
 	// Transport support protocols
 	Protocols() []multiaddr.Protocol
 }
@@ -137,6 +137,10 @@ func lookupTransports(addr multiaddr.Multiaddr) ([]multiaddr.Multiaddr, NativeTr
 			addrs = append([]multiaddr.Multiaddr{
 				multiaddr.Join(addrs[0 : count-i+1]...),
 			}, addrs[count-i+1:]...)
+
+			for i, j := 0, len(tunnels)-1; i < j; i, j = i+1, j-1 {
+				tunnels[i], tunnels[j] = tunnels[j], tunnels[i]
+			}
 
 			return addrs, nativeTransport, tunnels, nil
 		}

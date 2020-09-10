@@ -22,7 +22,7 @@ func newTCPTransport() *tcpTransport {
 	}
 }
 
-func (transport *tcpTransport) Name() string {
+func (transport *tcpTransport) String() string {
 	return "stf4go-transport-tcp"
 }
 
@@ -131,7 +131,7 @@ func (conn *tcpConn) RemoteAddr() multiaddr.Multiaddr {
 	return conn.raddr
 }
 
-func (conn *tcpConn) Underlying() *stf4go.Conn {
+func (conn *tcpConn) Underlying() stf4go.Conn {
 	return nil
 }
 

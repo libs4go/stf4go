@@ -111,11 +111,11 @@ func TestLookupTransports(t *testing.T) {
 		println(addr.String())
 	}
 
-	require.Equal(t, native.Name(), "kcp")
+	require.Equal(t, native, "kcp")
 
 	require.Equal(t, len(tunnels), 1)
 
-	require.Equal(t, tunnels[0].Name(), "p2p2")
+	require.Equal(t, tunnels[0], "p2p2")
 
 }
 

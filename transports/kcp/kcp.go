@@ -46,7 +46,7 @@ func newKCPTransport() *kcpTransport {
 	}
 }
 
-func (transport *kcpTransport) Name() string {
+func (transport *kcpTransport) String() string {
 	return "stf4go-transport-kcp"
 }
 
@@ -187,7 +187,7 @@ func (conn *kcpConn) RemoteAddr() multiaddr.Multiaddr {
 	return conn.raddr
 }
 
-func (conn *kcpConn) Underlying() *stf4go.Conn {
+func (conn *kcpConn) Underlying() stf4go.Conn {
 	return nil
 }
 

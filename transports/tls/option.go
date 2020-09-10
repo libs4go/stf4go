@@ -32,10 +32,6 @@ func getKey(config scf4go.Config) (key.Key, error) {
 
 	password := config.Get("tls", "key", "password").String("")
 
-	if password == "" {
-		return nil, errors.Wrap(stf4go.ErrPassword, "tls key need password")
-	}
-
 	buff, err = key.Decode("web3.standard", key.Property{
 		"password": password,
 	}, bytes.NewBuffer(buff))

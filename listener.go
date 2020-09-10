@@ -79,7 +79,7 @@ func Listen(laddr multiaddr.Multiaddr, options ...Option) (Listener, error) {
 	listener, err := nativeTransport.Listen(addrs[0], configWriter.config)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "call native transport %s Listen error", nativeTransport.Name())
+		return nil, errors.Wrap(err, "call native transport %s Listen error", nativeTransport)
 	}
 
 	return &chainListener{
@@ -100,14 +100,14 @@ func (listener *chainListener) Accept() (Conn, error) {
 	conn, err := listener.nativeListener.Accept()
 
 	if err != nil {
-		return nil, errors.Wrap(err, "call native transport %s listener#Accept error", listener.nativeTransport.Name())
+		return nil, errors.Wrap(err, "call native transport %s listener#Accept error", listener.nativeTransport)
 	}
 
 	for i, tunnel := range listener.tunnelTransports {
 		conn, err = tunnel.Server(conn, listener.tunnelAddrs[i], listener.config)
 
 		if err != nil {
-			return nil, errors.Wrap(err, "call tunnel transport %s Server error", tunnel.Name())
+			return nil, errors.Wrap(err, "call tunnel transport %s Server error", tunnel)
 		}
 	}
 
