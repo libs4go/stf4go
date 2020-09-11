@@ -1,7 +1,6 @@
 package tls
 
 import (
-	"bytes"
 	"context"
 	"testing"
 
@@ -49,29 +48,17 @@ func init() {
 	}
 }
 
-func newKeyStore(t *testing.T) stf4go.Option {
-	k, err := key.RandomKey("eth")
-
-	require.NoError(t, err)
-
-	var buff bytes.Buffer
-
-	err = key.Encode("web3.standard", k.PriKey(), key.Property{
-		"password": "test",
-	}, &buff)
-
-	require.NoError(t, err)
-
-	return KeyWeb3(buff.Bytes())
-}
-
 func TestListenConnect(t *testing.T) {
 
 	laddr, err := multiaddr.NewMultiaddr("/ip4/127.0.0.1/udp/1813/kcp/tls")
 
 	require.NoError(t, err)
 
-	listener, err := stf4go.Listen(laddr, KeyProvider("eth"), KeyPassword("test"), newKeyStore(t))
+	k, err := key.RandomKey("did")
+
+	require.NoError(t, err)
+
+	listener, err := stf4go.Listen(laddr, WithKey(k))
 
 	require.NoError(t, err)
 
@@ -79,7 +66,11 @@ func TestListenConnect(t *testing.T) {
 
 	go func() {
 
-		_, err := stf4go.Dial(context.Background(), laddr, KeyProvider("eth"), KeyPassword("test"), newKeyStore(t))
+		k, err := key.RandomKey("did")
+
+		require.NoError(t, err)
+
+		_, err = stf4go.Dial(context.Background(), laddr, WithKey(k))
 
 		require.NoError(t, err)
 

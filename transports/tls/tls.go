@@ -7,7 +7,6 @@ import (
 	_ "github.com/libs4go/bcf4go/key/encoding" //
 	_ "github.com/libs4go/bcf4go/key/provider" //
 	"github.com/libs4go/errors"
-	"github.com/libs4go/scf4go"
 	"github.com/libs4go/slf4go"
 	"github.com/libs4go/stf4go"
 	"github.com/multiformats/go-multiaddr"
@@ -56,7 +55,7 @@ func (transport *tlsTransport) Protocols() []multiaddr.Protocol {
 	}
 }
 
-func (transport *tlsTransport) Client(conn stf4go.Conn, raddr multiaddr.Multiaddr, config scf4go.Config) (stf4go.Conn, error) {
+func (transport *tlsTransport) Client(conn stf4go.Conn, raddr multiaddr.Multiaddr, options *stf4go.Options) (stf4go.Conn, error) {
 
 	wrapConn, err := stf4go.WrapConn(conn)
 
@@ -64,7 +63,7 @@ func (transport *tlsTransport) Client(conn stf4go.Conn, raddr multiaddr.Multiadd
 		return nil, err
 	}
 
-	key, err := getKey(config)
+	key, err := getKey(options)
 
 	if err != nil {
 		return nil, err
@@ -85,7 +84,7 @@ func (transport *tlsTransport) Client(conn stf4go.Conn, raddr multiaddr.Multiadd
 	return newTLSConn(session, conn, key.PubKey(), remoteKey)
 }
 
-func (transport *tlsTransport) Server(conn stf4go.Conn, laddr multiaddr.Multiaddr, config scf4go.Config) (stf4go.Conn, error) {
+func (transport *tlsTransport) Server(conn stf4go.Conn, laddr multiaddr.Multiaddr, options *stf4go.Options) (stf4go.Conn, error) {
 
 	wrapConn, err := stf4go.WrapConn(conn)
 
@@ -93,7 +92,7 @@ func (transport *tlsTransport) Server(conn stf4go.Conn, laddr multiaddr.Multiadd
 		return nil, err
 	}
 
-	key, err := getKey(config)
+	key, err := getKey(options)
 
 	if err != nil {
 		return nil, err

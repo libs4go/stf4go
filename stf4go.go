@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/libs4go/errors"
-	"github.com/libs4go/scf4go"
 	_ "github.com/libs4go/scf4go/codec" //
 	"github.com/libs4go/slf4go"
 	"github.com/multiformats/go-multiaddr"
@@ -20,6 +19,7 @@ var (
 	ErrMultiAddr = errors.New("multiaddr error", errors.WithVendor(errVendor), errors.WithCode(-2))
 	ErrPassword  = errors.New("password error", errors.WithVendor(errVendor), errors.WithCode(-3))
 	ErrSign      = errors.New("signature invalid", errors.WithVendor(errVendor), errors.WithCode(-4))
+	ErrResource  = errors.New("resource not found", errors.WithVendor(errVendor), errors.WithCode(-5))
 )
 
 var log = slf4go.Get("stf4go")
@@ -103,15 +103,15 @@ type Transport interface {
 // NativeTransport .
 type NativeTransport interface {
 	Transport
-	Listen(laddr multiaddr.Multiaddr, config scf4go.Config) (Listener, error)
-	Dial(ctx context.Context, raddr multiaddr.Multiaddr, config scf4go.Config) (Conn, error)
+	Listen(laddr multiaddr.Multiaddr, options *Options) (Listener, error)
+	Dial(ctx context.Context, raddr multiaddr.Multiaddr, options *Options) (Conn, error)
 }
 
 // TunnelTransport .
 type TunnelTransport interface {
 	Transport
-	Client(conn Conn, raddr multiaddr.Multiaddr, config scf4go.Config) (Conn, error)
-	Server(conn Conn, laddr multiaddr.Multiaddr, config scf4go.Config) (Conn, error)
+	Client(conn Conn, raddr multiaddr.Multiaddr, options *Options) (Conn, error)
+	Server(conn Conn, laddr multiaddr.Multiaddr, options *Options) (Conn, error)
 }
 
 func lookupTransports(addr multiaddr.Multiaddr) ([]multiaddr.Multiaddr, NativeTransport, []TunnelTransport, error) {

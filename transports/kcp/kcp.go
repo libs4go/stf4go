@@ -5,7 +5,6 @@ import (
 	"net"
 
 	"github.com/libs4go/errors"
-	"github.com/libs4go/scf4go"
 	"github.com/libs4go/slf4go"
 	"github.com/libs4go/stf4go"
 	"github.com/multiformats/go-multiaddr"
@@ -56,7 +55,7 @@ func (transport *kcpTransport) Protocols() []multiaddr.Protocol {
 	}
 }
 
-func (transport *kcpTransport) Listen(laddr multiaddr.Multiaddr, config scf4go.Config) (stf4go.Listener, error) {
+func (transport *kcpTransport) Listen(laddr multiaddr.Multiaddr, options *stf4go.Options) (stf4go.Listener, error) {
 
 	network, host, err := manet.DialArgs(laddr)
 
@@ -93,7 +92,7 @@ func (transport *kcpTransport) Listen(laddr multiaddr.Multiaddr, config scf4go.C
 	}, nil
 }
 
-func (transport *kcpTransport) Dial(ctx context.Context, raddr multiaddr.Multiaddr, config scf4go.Config) (stf4go.Conn, error) {
+func (transport *kcpTransport) Dial(ctx context.Context, raddr multiaddr.Multiaddr, options *stf4go.Options) (stf4go.Conn, error) {
 
 	network, host, err := manet.DialArgs(raddr)
 

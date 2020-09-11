@@ -66,7 +66,7 @@ func (conn *wrapConn) SetWriteDeadline(t time.Time) error {
 // Dial .
 func Dial(ctx context.Context, raddr multiaddr.Multiaddr, options ...Option) (Conn, error) {
 
-	configWriter := newConfigWriter()
+	configWriter := newOptions()
 
 	for _, option := range options {
 		if err := option(configWriter); err != nil {
@@ -74,7 +74,7 @@ func Dial(ctx context.Context, raddr multiaddr.Multiaddr, options ...Option) (Co
 		}
 	}
 
-	if err := configWriter.config.Load(configWriter.readerWriter); err != nil {
+	if err := configWriter.Load(); err != nil {
 		return nil, err
 	}
 
@@ -94,7 +94,7 @@ func Dial(ctx context.Context, raddr multiaddr.Multiaddr, options ...Option) (Co
 
 	log.D("tunnel tuns {@tuns}", strings.Join(tunns, ","))
 
-	conn, err := nativeTransport.Dial(ctx, addrs[0], configWriter.config)
+	conn, err := nativeTransport.Dial(ctx, addrs[0], configWriter)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "call native transport %s Dial error", nativeTransport)
@@ -102,7 +102,7 @@ func Dial(ctx context.Context, raddr multiaddr.Multiaddr, options ...Option) (Co
 
 	for i, tunnel := range tunnelTransports {
 		log.D("wrap tunnel client with addr {@addr}", addrs[i+1].String())
-		conn, err = tunnel.Client(conn, addrs[i+1], configWriter.config)
+		conn, err = tunnel.Client(conn, addrs[i+1], configWriter)
 
 		if err != nil {
 			return nil, errors.Wrap(err, "call tunnel transport %s Client error", tunnel)

@@ -4,7 +4,6 @@ import (
 	"net"
 
 	"github.com/libs4go/errors"
-	"github.com/libs4go/scf4go"
 	"github.com/multiformats/go-multiaddr"
 	mnet "github.com/multiformats/go-multiaddr/net"
 )
@@ -48,7 +47,7 @@ func (wrap *wrapListener) Addr() net.Addr {
 
 type chainListener struct {
 	laddr            multiaddr.Multiaddr
-	config           scf4go.Config
+	config           *Options
 	nativeTransport  NativeTransport
 	tunnelTransports []TunnelTransport
 	nativeListener   Listener
@@ -58,7 +57,7 @@ type chainListener struct {
 // Listen .
 func Listen(laddr multiaddr.Multiaddr, options ...Option) (Listener, error) {
 
-	configWriter := newConfigWriter()
+	configWriter := newOptions()
 
 	for _, option := range options {
 		if err := option(configWriter); err != nil {
@@ -66,7 +65,7 @@ func Listen(laddr multiaddr.Multiaddr, options ...Option) (Listener, error) {
 		}
 	}
 
-	if err := configWriter.config.Load(configWriter.readerWriter); err != nil {
+	if err := configWriter.Load(); err != nil {
 		return nil, err
 	}
 
@@ -76,7 +75,7 @@ func Listen(laddr multiaddr.Multiaddr, options ...Option) (Listener, error) {
 		return nil, err
 	}
 
-	listener, err := nativeTransport.Listen(addrs[0], configWriter.config)
+	listener, err := nativeTransport.Listen(addrs[0], configWriter)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "call native transport %s Listen error", nativeTransport)
@@ -84,7 +83,7 @@ func Listen(laddr multiaddr.Multiaddr, options ...Option) (Listener, error) {
 
 	return &chainListener{
 		laddr:            laddr,
-		config:           configWriter.config,
+		config:           configWriter,
 		nativeTransport:  nativeTransport,
 		tunnelTransports: tunnelTransports,
 		nativeListener:   listener,
