@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/libs4go/scf4go"
 	"github.com/multiformats/go-multiaddr"
 	"github.com/stretchr/testify/require"
 )
@@ -46,7 +45,7 @@ var protoP2P = multiaddr.Protocol{
 type testKCPTransport struct {
 }
 
-func (transport *testKCPTransport) Name() string {
+func (transport *testKCPTransport) String() string {
 	return "kcp"
 }
 
@@ -54,18 +53,18 @@ func (transport *testKCPTransport) Protocols() []multiaddr.Protocol {
 	return []multiaddr.Protocol{protoKCP}
 }
 
-func (transport *testKCPTransport) Listen(laddr multiaddr.Multiaddr, config scf4go.Config) (Listener, error) {
+func (transport *testKCPTransport) Listen(laddr multiaddr.Multiaddr, options *Options) (Listener, error) {
 	return nil, nil
 }
 
-func (transport *testKCPTransport) Dial(ctx context.Context, raddr multiaddr.Multiaddr, config scf4go.Config) (Conn, error) {
+func (transport *testKCPTransport) Dial(ctx context.Context, raddr multiaddr.Multiaddr, options *Options) (Conn, error) {
 	return nil, nil
 }
 
 type testP2PTransport struct {
 }
 
-func (transport *testP2PTransport) Name() string {
+func (transport *testP2PTransport) String() string {
 	return "p2p2"
 }
 
@@ -73,11 +72,11 @@ func (transport *testP2PTransport) Protocols() []multiaddr.Protocol {
 	return []multiaddr.Protocol{protoP2P}
 }
 
-func (transport *testP2PTransport) Client(conn Conn, raddr multiaddr.Multiaddr, config scf4go.Config) (Conn, error) {
+func (transport *testP2PTransport) Client(conn Conn, raddr multiaddr.Multiaddr, options *Options) (Conn, error) {
 	return nil, nil
 }
 
-func (transport *testP2PTransport) Server(conn Conn, laddr multiaddr.Multiaddr, config scf4go.Config) (Conn, error) {
+func (transport *testP2PTransport) Server(conn Conn, laddr multiaddr.Multiaddr, options *Options) (Conn, error) {
 	return nil, nil
 }
 
